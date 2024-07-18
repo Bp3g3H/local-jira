@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\ProjectResource;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
-use App\Http\Resources\ProjectResource;
 
 class ProjectController extends Controller
 {
@@ -58,7 +59,32 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        //
+        $query = $project->tasks();
+        $sortField = request('sort_field', 'created_at');
+        $sortDirection = request('sort_direction', 'desc');
+
+        if (request('name')) {
+            $query->where('name', 'like', '%' . request('name') . '%');
+        }
+
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+
+        if (request('priority')) {
+            $query->where('priority', request('priority'));
+        }
+        $tasks = $query->orderBy($sortField, $sortDirection)
+            ->paginate(10)
+            ->onEachSide(1);
+        /** @var \Illuminate\Http\Reques */
+        $request = request();
+
+        return inertia('Project/Show', [
+            'project' => new ProjectResource($project),
+            'queryParams' => $request->query() ?: null,
+            'tasks' => TaskResource::collection($tasks),
+        ]);
     }
 
     /**

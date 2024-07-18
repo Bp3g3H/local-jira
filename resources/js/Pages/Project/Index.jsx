@@ -99,8 +99,6 @@ export default function Index({ auth, projects, queryParams = null }) {
                                                 sortable={false}
                                                 additional_styles='text-right'
                                             >Actions</TableHeading>
-                                            <th className="px-3 py-3">Created By</th>
-                                            <th className="px-3 py-3 text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <thead className="text-ts text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 border-b-2 border-gray-500">
@@ -140,7 +138,7 @@ export default function Index({ auth, projects, queryParams = null }) {
                                                 <td className="px-3 py-2">
                                                     <img src={project.image_path} style={{ width: 60 }} />
                                                 </td>
-                                                <td className="px-3 py-2">{project.name}</td>
+                                                <td className="px-3 py-2 text-white text-nowrap hover:underline"><Link href={route("project.show", project.id)}>{project.name}</Link></td>
                                                 <td className="px-3 py-2">
                                                     <span className={
                                                         "px-3 py-1 rounded text-white " +
