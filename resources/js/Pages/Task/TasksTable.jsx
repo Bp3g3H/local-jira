@@ -3,7 +3,7 @@ import SelectInput from "@/Components/SelectInput";
 import TableHeading from "@/Components/TableHeading";
 import TextInput from "@/Components/TextInput";
 import { TASK_PRIORITY_CLASS_MAP, TASK_PRIORITY_TEXT_MAP, TASK_STATUS_CLASS_MAP, TASK_STATUS_TEXT_MAP } from "@/constants.jsx";
-import { Link } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 
 export default function TasksTable({
     tasks,
@@ -11,7 +11,14 @@ export default function TasksTable({
     searchFieldChanged,
     onKeyPress,
     sortChanged,
-    hideProjectColumn = false }) {
+    hideTaskColumn = false }) {
+    const deleteTask = (id) => {
+        if (!window.confirm('Do you want to delete this task?')) {
+            return;
+        }
+
+        router.delete(route('task.destroy', id))
+    }
     return (
         <>
             <div className="overflow-auto">
@@ -29,10 +36,10 @@ export default function TasksTable({
                                 name='image'
                                 sortable={false}
                             >Image</TableHeading>
-                            {!hideProjectColumn && (<TableHeading
-                                name='project_name'
+                            {!hideTaskColumn && (<TableHeading
+                                name='task_name'
                                 sortable={false}
-                            >Project Name</TableHeading>)}
+                            >Task Name</TableHeading>)}
                             <TableHeading
                                 name='name'
                                 onClickHandler={sortChanged}
@@ -83,12 +90,12 @@ export default function TasksTable({
                         <tr className="text-nowrap">
                             <th className="px-3 py-3"></th>
                             <th className="px-3 py-3"></th>
-                            {!hideProjectColumn && (<th className="px-3 py-3"></th>)}
+                            {!hideTaskColumn && (<th className="px-3 py-3"></th>)}
                             <th className="px-3 py-3">
                                 <TextInput
                                     className="w-full"
                                     defaultValue={queryParams.name}
-                                    placeholder="Task Name"
+                                    placeholder="Project Name"
                                     onBlur={e => searchFieldChanged("name", e.target.value)}
                                     onKeyPress={e => onKeyPress('name', e)}
                                 />
@@ -128,7 +135,7 @@ export default function TasksTable({
                                 <td className="px-3 py-2">
                                     <img src={task.image_path} style={{ width: 60 }} />
                                 </td>
-                                {!hideProjectColumn && (<td className="px-3 py-2">{task.project.name}</td>)}
+                                {!hideTaskColumn && (<td className="px-3 py-2">{task.project.name}</td>)}
                                 <td className="px-3 py-2">{task.name}</td>
                                 <td className="px-3 py-2">
                                     <span className={
@@ -149,13 +156,16 @@ export default function TasksTable({
                                 <td className="px-3 py-2 text-nowrap">{task.created_at}</td>
                                 <td className="px-3 py-2 text-nowrap">{task.due_date}</td>
                                 <td className="px-3 py-2">{task.createdBy.name}</td>
-                                <td className="px-3 py-2">
+                                <td className="px-3 py-2 text-nowrap text-right">
                                     <Link className="font-medium text-blue-600 dark:text-blue-500 hover:underline mx-1" href={route('task.edit', task.id)}>
                                         Edit
                                     </Link>
-                                    <Link className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1" href={route('task.destroy', task.id)}>
+                                    <button
+                                        className="font-medium text-red-600 dark:text-red-500 hover:underline mx-1"
+                                        onClick={e => deleteTask(task.id)}
+                                    >
                                         Delete
-                                    </Link>
+                                    </button>
                                 </td>
                             </tr>
                         ))}
