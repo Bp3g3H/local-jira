@@ -86,31 +86,8 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
-        $query = $task->tasks();
-        $sortField = request('sort_field', 'created_at');
-        $sortDirection = request('sort_direction', 'desc');
-
-        if (request('name')) {
-            $query->where('name', 'like', '%' . request('name') . '%');
-        }
-
-        if (request('status')) {
-            $query->where('status', request('status'));
-        }
-
-        if (request('priority')) {
-            $query->where('priority', request('priority'));
-        }
-        $tasks = $query->orderBy($sortField, $sortDirection)
-            ->paginate(10)
-            ->onEachSide(1);
-        /** @var \Illuminate\Http\Reques */
-        $request = request();
-
         return inertia('Task/Show', [
             'task' => new TaskResource($task),
-            'queryParams' => $request->query() ?: null,
-            'tasks' => TaskResource::collection($tasks),
         ]);
     }
 
@@ -158,5 +135,35 @@ class TaskController extends Controller
         }
         $task->delete();
         to_route('task.index')->with('success', 'Task was deleted');
+    }
+
+    public function myTasks() {
+        $user = Auth::user();
+        $query = Task::query();
+        $sortField = request('sort_field', 'created_at');
+        $sortDirection = request('sort_direction', 'desc');
+        $query->where('assigned_user_id', $user->id);
+        if (request('name')) {
+            $query->where('name', 'like', '%' . request('name') . '%');
+        }
+
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+
+        if (request('priority')) {
+            $query->where('priority', request('priority'));
+        }
+
+        $tasks = $query->orderBy($sortField, $sortDirection)
+            ->paginate(10)
+            ->onEachSide(1);
+        /** @var \Illuminate\Http\Reques */
+        $request = request();
+        return inertia('Task/Index', [
+            'tasks' => TaskResource::collection($tasks),
+            'queryParams' => $request->query() ?: null,
+            'success' => session('success'),
+        ]);
     }
 }
